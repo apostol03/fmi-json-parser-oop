@@ -2,7 +2,6 @@
 #define JSON_NUMBER_H
 
 #include <cmath>
-#include <iomanip>
 
 #include "JSONValue.h"
 
