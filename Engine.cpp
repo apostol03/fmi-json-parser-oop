@@ -23,7 +23,7 @@ void Engine::prompt()
     std::string command;
     while (true)
     {
-        std::cout << "[" << currentFilePath << "] " << "> ";
+        std::cout << "\n[" << currentFilePath << "] " << "> ";
         std::getline(std::cin, command);
         if (command == "exit")
         {
@@ -41,21 +41,55 @@ void Engine::executeCommand(const std::string &command)
     }
     else if (command == "print")
     {
-        // parser->print();   
+        parser->print();
     }
     else if (command.rfind("search ", 0) == 0)
     {
         std::string key = command.substr(7);
-        std::vector<JSONValue*> values = parser->searchKey(key);
+        std::vector<JSONValue *> values = parser->searchKey(key);
         std::cout << "\"" << key << "\"" << ":" << std::endl;
         std::cout << "[" << std::endl;
         for (const auto &value : values)
         {
-            std::cout << "  " << value->toString() << std::endl;
+            std::cout << value->toString() << std::endl;
         }
         std::cout << "]" << std::endl;
     }
-    
+    else if (command.rfind("contains ", 0) == 0)
+    {
+        std::string value = command.substr(9);
+        if (parser->contains(value))
+        {
+            std::cout << "The value \"" << value << "\" is present in the JSON document." << std::endl;
+        }
+        else
+        {
+            std::cout << "The value \"" << value << "\" is not present in the JSON document." << std::endl;
+        }
+    }
+    else if (command.rfind("set ", 0) == 0)
+    {
+        size_t pos = command.find(" ", 4);
+
+        if (pos == std::string::npos)
+        {
+            std::cerr << "Invalid command format." << std::endl;
+            return;
+        }
+
+        std::string path = command.substr(4, pos - 4);
+        std::string value = command.substr(pos + 1);
+
+        if (parser->set(path, value))
+        {
+            std::cout << "Successfully updated the value at path: " << path << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to update the value at path: " << path << std::endl;
+        }
+        parser->writeToFile(currentFilePath);
+    }
 }
 
 void Engine::openFile(const std::string &filePath)
@@ -83,7 +117,7 @@ void Engine::openFile(const std::string &filePath)
         parser = new Parser(input);
         fileLoaded = true;
         currentFilePath = filePath;
-        std::cout << "Successfully loaded file at " << filePath << std::endl;
+        std::cout << "Successfully loaded file " << filePath << std::endl;
     }
     catch (const std::exception &e)
     {

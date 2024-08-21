@@ -13,7 +13,7 @@
 class Printer
 {
 public:
-    void print(const JSONValue *jsonValue, int indentLevel = 0)
+    static void print(const JSONValue *jsonValue, int indentLevel = 0)
     {
         switch (jsonValue->getType())
         {
@@ -39,29 +39,28 @@ public:
     }
 
 private:
-    void printString(const JSONString *jsonString)
+    static void printString(const JSONString *jsonString)
     {
         std::cout << jsonString->toString();
     }
 
-    void printNumber(const JSONNumber *jsonNumber)
+    static void printNumber(const JSONNumber *jsonNumber)
     {
         std::cout << jsonNumber->toString();
     }
 
-    void printBool(const JSONBool *jsonBool)
+    static void printBool(const JSONBool *jsonBool)
     {
         std::cout << jsonBool->toString();
     }
 
-    void printObject(const JSONObject *jsonObject, int indentLevel)
+    static void printObject(const JSONObject *jsonObject, int indentLevel)
     {
-        std::string indent(indentLevel, ' ');
         std::cout << "{\n";
         const auto &values = jsonObject->getValues();
         for (size_t i = 0; i < values.size(); ++i)
         {
-            std::cout << indent << "\"" << values[i].key << "\": ";
+            std::cout << std::string(indentLevel + 2, ' ') << "\"" << values[i].key << "\": ";
             print(values[i].value, indentLevel + 2);
 
             if (i < values.size() - 1)
@@ -71,17 +70,17 @@ private:
 
             std::cout << "\n";
         }
-        std::cout << indent << "}";
+        std::cout << std::string(indentLevel, ' ') << "}";
     }
 
-    void printArray(const JSONArray *jsonArray, int indentLevel)
+    static void printArray(const JSONArray *jsonArray, int indentLevel)
     {
         std::string indent(indentLevel, ' ');
         std::cout << "[\n";
         const auto &values = jsonArray->getValues();
         for (size_t i = 0; i < values.size(); ++i)
         {
-            std::cout << indent;
+            std::cout << std::string(indentLevel + 2, ' ');
             print(values[i], indentLevel + 2);
 
             if (i < values.size() - 1)
@@ -91,7 +90,7 @@ private:
 
             std::cout << "\n";
         }
-        std::cout << indent << "]";
+        std::cout << std::string(indentLevel, ' ') << "]";
     }
 };
 

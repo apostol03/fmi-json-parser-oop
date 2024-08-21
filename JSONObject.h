@@ -30,7 +30,7 @@ public:
             }
             result += "  \"" + values[i].key + "\": " + values[i].value->toString();
         }
-        result += "\n  }";
+        result += "\n}";
         return result;
     }
 
