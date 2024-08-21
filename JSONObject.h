@@ -21,16 +21,16 @@ public:
 
     std::string toString() const override
     {
-        std::string result = "{";
+        std::string result = "{\n";
         for (size_t i = 0; i < values.size(); i++)
         {
             if (i > 0)
             {
-                result += ", ";
+                result += ", \n";
             }
-            result += values[i].key + ": " + values[i].value->toString();
+            result += "  \"" + values[i].key + "\": " + values[i].value->toString();
         }
-        result += "}";
+        result += "\n  }";
         return result;
     }
 

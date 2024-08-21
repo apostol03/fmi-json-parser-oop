@@ -1,14 +1,9 @@
-#ifndef VALIDATOR_H
-#define VALIDATOR_H
-
-#include <iostream>
-
 #include "Lexer.h"
 
 class Validator
 {
 public:
-    Validator(const std::string &stringInput) : lexer(stringInput), currentToken(lexer.nextToken()) {}
+    Validator(Lexer &lexer) : lexer(lexer), currentToken(lexer.nextToken()) {}
 
     bool validate()
     {
@@ -142,5 +137,3 @@ private:
     Lexer lexer;
     Token currentToken;
 };
-
-#endif

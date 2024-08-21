@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "Validator.h"
+#include "Parser.h"
 #include "Searcher.h"
 
 /**
@@ -32,15 +32,14 @@ private:
     void executeCommand(const std::string &command);
 
     /**
-     * Opens the specified file and loads its content into the validator.
+     * Opens the specified file and loads its content into the parser.
      * If the file does not exist, it creates a new file with empty content.
      * @param filePath Path to the file to open.
      */
     void openFile(const std::string &filePath);
 
 private:
-    Validator *validator = nullptr;
-    Searcher searcher;
+    Parser *parser = nullptr;
     bool fileLoaded = false;
     std::string currentFilePath;
 };

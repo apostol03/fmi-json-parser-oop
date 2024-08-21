@@ -7,7 +7,7 @@
 class Searcher
 {
 public:
-    std::vector<JSONValue *> searchByKey(const JSONObject *jsonObject, const std::string &key)
+    static std::vector<JSONValue *> searchByKey(const JSONObject *jsonObject, const std::string &key)
     {
         std::vector<JSONValue *> results;
         searchObject(jsonObject, key, results);
@@ -15,7 +15,7 @@ public:
     }
 
 private:
-    void searchObject(const JSONObject *jsonObject, const std::string &key, std::vector<JSONValue *> &results)
+    static void searchObject(const JSONObject *jsonObject, const std::string &key, std::vector<JSONValue *> &results)
     {
         for (const auto &keyValue : jsonObject->getValues())
         {
@@ -35,7 +35,7 @@ private:
         }
     }
 
-    void searchArray(const JSONArray *jsonArray, const std::string &key, std::vector<JSONValue *> &results)
+    static void searchArray(const JSONArray *jsonArray, const std::string &key, std::vector<JSONValue *> &results)
     {
         for (const auto &value : jsonArray->getValues())
         {

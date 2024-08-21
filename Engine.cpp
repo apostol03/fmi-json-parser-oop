@@ -12,6 +12,7 @@ void Engine::prompt()
         openFile(filePath);
     }
 
+    std::cout << "------------------------------------------------------------------------------" << std::endl;
     std::cout << "Welcome! Pick any of the following commands to operate with the JSON Parser: " << std::endl;
     std::cout << "------------------------------------------------------------------------------" << std::endl;
     std::cout << "open <path> | validate | print | search <key> | " << std::endl;
@@ -36,12 +37,23 @@ void Engine::executeCommand(const std::string &command)
 {
     if (command == "validate")
     {
-        std::cout << (validator->validate() ? "Valid JSON file." : "Invalid JSON file.") << std::endl;
+        std::cout << (parser->validate() ? "Valid JSON file." : "Invalid JSON file.") << std::endl;
+    }
+    else if (command == "print")
+    {
+        // parser->print();   
     }
     else if (command.rfind("search ", 0) == 0)
     {
         std::string key = command.substr(7);
-        // searcher.searchByKey()
+        std::vector<JSONValue*> values = parser->searchKey(key);
+        std::cout << "\"" << key << "\"" << ":" << std::endl;
+        std::cout << "[" << std::endl;
+        for (const auto &value : values)
+        {
+            std::cout << "  " << value->toString() << std::endl;
+        }
+        std::cout << "]" << std::endl;
     }
     
 }
@@ -68,7 +80,7 @@ void Engine::openFile(const std::string &filePath)
 
     try
     {
-        validator = new Validator(input);
+        parser = new Parser(input);
         fileLoaded = true;
         currentFilePath = filePath;
         std::cout << "Successfully loaded file at " << filePath << std::endl;
@@ -77,7 +89,7 @@ void Engine::openFile(const std::string &filePath)
     {
         std::cerr << "Error loading file: " << e.what() << std::endl;
         fileLoaded = false;
-        delete validator;
-        validator = nullptr;
+        delete parser;
+        parser = nullptr;
     }
 }
