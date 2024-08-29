@@ -96,7 +96,29 @@ public:
             return false;
         }
 
-        JSONValue *target = navigateToPath(root, tokens);
+        JSONValue *parent = root;
+        std::string lastToken = tokens.back();
+        tokens.pop_back();
+        
+        for (const std::string &token : tokens)
+        {
+            JSONObject *obj = dynamic_cast<JSONObject *>(parent);
+            if (!obj)
+            {
+                std::cerr << "Invalid path: " << path << std::endl;
+                return false;
+            }
+            parent = obj->getValue(token);
+        }
+
+        JSONObject *parentObj = dynamic_cast<JSONObject *>(parent);
+        if (!parentObj)
+        {
+            std::cerr << "Invalid path: " << path << std::endl;
+            return false;
+        }
+
+        JSONValue *target = parentObj->getValue(lastToken);
         if (!target)
         {
             std::cerr << "Path not found: " << path << std::endl;
@@ -111,9 +133,8 @@ public:
             return false;
         }
 
-        target = parsedNewValue;
-        delete parsedNewValue;
-
+        parentObj->setValue(lastToken, parsedNewValue);
+        
         return true;
     }
 
@@ -220,7 +241,9 @@ private:
         while (std::getline(ss, item, '/'))
         {
             if (!item.empty())
+            {
                 tokens.push_back(item);
+            }
         }
 
         return tokens;
@@ -252,7 +275,7 @@ private:
 
     void writeJSON(std::ostream &outFile, JSONValue *value, int indent = 0) const
     {
-        std::string indentStr(indent, ' '); 
+        std::string indentStr(indent, ' ');
 
         switch (value->getType())
         {

@@ -44,6 +44,34 @@ public:
         return values;
     }
 
+    void setValue(const std::string &key, JSONValue *newValue)
+    {
+        for (auto &keyValue : values)
+        {
+            if (keyValue.key == key)
+            {
+                delete keyValue.value;
+                keyValue.value = newValue;
+                return;
+            }
+        }
+
+        values.emplace_back(key, newValue);
+    }
+
+    JSONValue *getValue(const std::string &key)
+    {
+        for (auto &keyValue : values)
+        {
+            if (keyValue.key == key)
+            {
+                return keyValue.value;
+            }
+        }
+
+        return nullptr;
+    }
+
 private:
     std::vector<KeyValue> values;
 };
