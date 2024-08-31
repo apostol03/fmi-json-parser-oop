@@ -3,6 +3,10 @@
 
 #include "JSONValue.h"
 
+/**
+ * Structure representing a key-value pair where the key
+ * is a std::string and the value is a JSONValue pointer.
+ */
 struct KeyValue
 {
     std::string key;
@@ -14,76 +18,46 @@ struct KeyValue
 class JSONObject : public JSONValue
 {
 public:
-    JSONValueType getType() const override
-    {
-        return JSONValueType::OBJECT;
-    }
+    JSONValueType getType() const override;
+    std::string toString() const override;
 
-    std::string toString() const override
-    {
-        std::string result = "{\n";
-        for (size_t i = 0; i < values.size(); i++)
-        {
-            if (i > 0)
-            {
-                result += ", \n";
-            }
-            result += "  \"" + values[i].key + "\": " + values[i].value->toString();
-        }
-        result += "\n}";
-        return result;
-    }
+    /**
+     * Returns the values vector.
+     *
+     * @return Vector of KeyValue pairs containing the values
+     */
+    std::vector<KeyValue> getValues() const;
 
-    void addValue(const std::string &key, JSONValue *value)
-    {
-        values.emplace_back(key, value);
-    }
+    /**
+     * Returns the value at a given key.
+     *
+     * @param key the key to find the value by
+     * @return JSONValue pointer to the value at the given key
+     */
+    JSONValue *getValue(const std::string &key);
 
-    std::vector<KeyValue> getValues() const 
-    {
-        return values;
-    }
+    /**
+     * Updates the value at a given key.
+     *
+     * @param key the key of the value to update
+     * @param newValue the value to replace the old one with
+     */
+    void setValue(const std::string &key, JSONValue *newValue);
 
-    void setValue(const std::string &key, JSONValue *newValue)
-    {
-        for (auto &keyValue : values)
-        {
-            if (keyValue.key == key)
-            {
-                delete keyValue.value;
-                keyValue.value = newValue;
-                return;
-            }
-        }
+    /**
+     * Adds a new pair of key and value to the values vector.
+     *
+     * @param key
+     * @param value
+     */
+    void addValue(const std::string &key, JSONValue *value);
 
-        values.emplace_back(key, newValue);
-    }
-
-    JSONValue *getValue(const std::string &key)
-    {
-        for (auto &keyValue : values)
-        {
-            if (keyValue.key == key)
-            {
-                return keyValue.value;
-            }
-        }
-
-        return nullptr;
-    }
-
-    void removeValue(const std::string &key)
-    {
-        for (auto it = values.begin(); it != values.end(); ++it)
-        {
-            if (it->key == key)
-            {
-                delete it->value;
-                values.erase(it);
-                return;
-            }
-        }
-    }
+    /**
+     * Removes a value from the values vector.
+     * 
+     * @param key used to find the value to remove
+     */
+    void removeValue(const std::string &key);
 
 private:
     std::vector<KeyValue> values;

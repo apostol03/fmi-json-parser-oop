@@ -6,18 +6,11 @@
 class JSONString : public JSONValue
 {
 public:
-    JSONString(const std::string &value) : value(value) {}
+    JSONString(const std::string &value);
     
-    JSONValueType getType() const override 
-    {
-        return JSONValueType::STRING;
-    }
+    JSONValueType getType() const override;
 
-    std::string toString() const override
-    {
-        return "\"" + value + "\"";
-    }
-
+    std::string toString() const override;
 private:
     std::string value;
 };

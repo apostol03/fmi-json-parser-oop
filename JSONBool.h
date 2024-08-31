@@ -6,18 +6,10 @@
 class JSONBool : public JSONValue
 {
 public:
-    JSONBool(bool value) : value(value) {}
-
-    JSONValueType getType() const override 
-    {
-        return JSONValueType::BOOL;
-    }
-
-    std::string toString() const override
-    {
-        return value ? "true" : "false";
-    }
-
+    JSONBool(bool value);
+    JSONValueType getType() const override;
+    std::string toString() const override;
+    
 private:
     bool value;
 };

@@ -8,22 +8,11 @@
 class JSONNumber : public JSONValue
 {
 public:
-    JSONNumber(double value) : value(value) {}
+    JSONNumber(double value);
 
-    JSONValueType getType() const override
-    {
-        return JSONValueType::NUMBER;
-    }
+    JSONValueType getType() const override;
 
-    std::string toString() const override
-    {
-        if (value == std::floor(value))
-        {
-            return std::to_string(static_cast<int>(value));
-        }
-
-        return std::to_string(value);
-    }
+    std::string toString() const override;
 
 private:
     double value;

@@ -6,15 +6,8 @@
 class JSONNull : public JSONValue
 {
 public:
-    JSONValueType getType() const override
-    {
-        return JSONValueType::NILL;
-    }
-
-    std::string toString() const override
-    {
-        return "null";
-    }
+    JSONValueType getType() const override;
+    std::string toString() const override;
 };
 
 #endif

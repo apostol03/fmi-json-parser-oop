@@ -6,36 +6,22 @@
 class JSONArray : public JSONValue
 {
 public:
-    JSONValueType getType() const override
-    {
-        return JSONValueType::ARRAY;
-    }
+    JSONValueType getType() const override;
+    std::string toString() const override;
 
-    std::string toString() const override
-    {
-        std::string result = "[";
-        for (size_t i = 0; i < values.size(); i++)
-        {
-            if (i > 0)
-            {
-                result += ", ";
-            }
+    /**
+     * Adds a JSON value to the values vector.
+     * 
+     * @param value the value to add
+     */
+    void addValue(JSONValue *value);
 
-            result += values[i]->toString();
-        }
-        result += "]";
-        return result;
-    }
-
-    void addValue(JSONValue *value)
-    {
-        values.push_back(value);
-    }
-
-    std::vector<JSONValue *> getValues() const
-    {
-        return values;
-    }
+    /**
+     * Returns the values vector.
+     * 
+     * @return Vector of JSONValue pointers containing the values
+     */
+    std::vector<JSONValue *> getValues() const;
 
 private:
     std::vector<JSONValue *> values;
