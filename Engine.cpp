@@ -35,7 +35,12 @@ void Engine::prompt()
 
 void Engine::executeCommand(const std::string &command)
 {
-    if (command == "validate")
+    if (command.rfind("open ", 0) == 0)
+    {
+        std::string filePath = command.substr(5);
+        openFile(filePath);
+    }
+    else if (command == "validate")
     {
         std::cout << (parser->validate() ? "Valid JSON file." : "Invalid JSON file.") << std::endl;
     }
@@ -89,6 +94,124 @@ void Engine::executeCommand(const std::string &command)
             std::cout << "Failed to update the value at path: " << path << std::endl;
         }
         parser->writeToFile(currentFilePath);
+    }
+    else if (command.rfind("create ", 0) == 0)
+    {
+        size_t pos = command.find(" ", 7);
+
+        if (pos == std::string::npos)
+        {
+            std::cerr << "Invalid command format." << std::endl;
+            return;
+        }
+
+        std::string path = command.substr(7, pos - 7);
+        std::string value = command.substr(pos + 1);
+        if (parser->create(path, value))
+        {
+            std::cout << "Successfully created the value at path: " << path << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to create the value at path: " << path << std::endl;
+        }
+        parser->writeToFile(currentFilePath);
+    }
+    else if (command.rfind("delete ", 0) == 0)
+    {
+        std::string path = command.substr(7);
+        if (parser->deleteElement(path))
+        {
+            std::cout << "Successfully deleted the value at path: " << path << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to delete the value at path: " << path << std::endl;
+        }
+        parser->writeToFile(currentFilePath);
+    }
+
+    // TODO: fix
+    else if (command.rfind("move ", 0) == 0)
+    {
+        size_t pos = command.find(" ", 5);
+        if (pos == std::string::npos)
+        {
+            std::cerr << "Invalid command format." << std::endl;
+            return;
+        }
+        std::string from = command.substr(5, pos - 5);
+        std::string to = command.substr(pos + 1);
+        if (parser->move(from, to))
+        {
+            std::cout << "Successfully moved the value from path: " << from << " to path: " << to << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to move the value from path: " << from << " to path: " << to << std::endl;
+        }
+        parser->writeToFile(currentFilePath);
+    }
+    else if (command == "save")
+    {
+        if (parser->save(currentFilePath))
+        {
+            std::cout << "Successfully saved JSON file " << currentFilePath << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to save the JSON" << std::endl;
+        }
+    }
+    else if (command.rfind("save ", 0) == 0)
+    {
+        std::string path = command.substr(5);
+        if (parser->save(currentFilePath, "", path))
+        {
+            std::cout << "Successfully saved " << path << " in JSON file " << currentFilePath << std::endl;
+        }
+        else
+        {
+            std::cout << "Failed to save JSON path " << path << std::endl;
+        }
+    }
+    else if (command.rfind("saveas ", 0) == 0)
+    {
+        size_t pos = command.find(" ", 7);
+        if (pos == std::string::npos)
+        {
+            std::cerr << "Invalid command format." << std::endl;
+            return;
+        }
+        std::string file = command.substr(7, pos - 7);
+        std::string path = command.substr(pos + 1);
+
+        if (path.empty())
+        {
+            if (parser->saveas(currentFilePath, file, ""))
+            {
+                std::cout << "Successfully saved JSON to " << file << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to save JSON to " << file << std::endl;
+            }
+        }
+        else
+        {
+            if (parser->saveas(currentFilePath, file, path))
+            {
+                std::cout << "Successfully saved the JSON at path: " << path << " to " << file << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to save the JSON at path: " << path << " to " << file << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cerr << "Unknown command: " << command << std::endl;
     }
 }
 

@@ -4,16 +4,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "Lexer.h"
 #include "Validator.h"
 #include "Printer.h"
 
-#include "JSONValue.h"
-#include "JSONString.h"
-#include "JSONNumber.h"
-#include "JSONBool.h"
-#include "JSONArray.h"
-#include "JSONObject.h"
 #include "JSONNull.h"
 #include "Searcher.h"
 
@@ -99,7 +92,7 @@ public:
         JSONValue *parent = root;
         std::string lastToken = tokens.back();
         tokens.pop_back();
-        
+
         for (const std::string &token : tokens)
         {
             JSONObject *obj = dynamic_cast<JSONObject *>(parent);
@@ -134,8 +127,260 @@ public:
         }
 
         parentObj->setValue(lastToken, parsedNewValue);
-        
+
         return true;
+    }
+
+    bool create(const std::string &path, const std::string &newValue)
+    {
+        if (!root)
+        {
+            std::cerr << "No JSON structure parsed." << std::endl;
+            return false;
+        }
+
+        std::vector<std::string> tokens = splitPath(path);
+        if (tokens.empty())
+        {
+            std::cerr << "Invalid JSON path." << std::endl;
+            return false;
+        }
+
+        JSONValue *parent = root;
+        std::string lastToken = tokens.back();
+        tokens.pop_back();
+
+        for (const std::string &token : tokens)
+        {
+            JSONObject *obj = dynamic_cast<JSONObject *>(parent);
+            if (!obj)
+            {
+                std::cerr << "Invalid path: " << path << std::endl;
+                return false;
+            }
+            JSONValue *nextValue = obj->getValue(token);
+            if (!nextValue)
+            {
+                nextValue = new JSONObject();
+                obj->setValue(token, nextValue);
+            }
+            parent = nextValue;
+        }
+
+        JSONObject *parentObj = dynamic_cast<JSONObject *>(parent);
+        if (!parentObj)
+        {
+            std::cerr << "Invalid path: " << path << std::endl;
+            return false;
+        }
+
+        if (parentObj->getValue(lastToken))
+        {
+            std::cerr << "Element already exists at path: " << path << std::endl;
+            return false;
+        }
+
+        Lexer valueLexer(newValue);
+        JSONValue *parsedNewValue = parseNewValue(valueLexer);
+        if (!parsedNewValue)
+        {
+            std::cerr << "Invalid new value: " << newValue << std::endl;
+            return false;
+        }
+
+        parentObj->setValue(lastToken, parsedNewValue);
+
+        return true;
+    }
+
+    bool deleteElement(const std::string &path)
+    {
+        if (!root)
+        {
+            std::cerr << "No JSON structure parsed." << std::endl;
+            return false;
+        }
+
+        std::vector<std::string> tokens = splitPath(path);
+        if (tokens.empty())
+        {
+            std::cerr << "Invalid JSON path." << std::endl;
+            return false;
+        }
+
+        JSONValue *parent = root;
+        std::string lastToken = tokens.back();
+        tokens.pop_back();
+
+        for (const std::string &token : tokens)
+        {
+            JSONObject *obj = dynamic_cast<JSONObject *>(parent);
+            if (!obj)
+            {
+                std::cerr << "Invalid path: " << path << std::endl;
+                return false;
+            }
+            JSONValue *nextValue = obj->getValue(token);
+            if (!nextValue)
+            {
+                std::cerr << "Path not found: " << path << std::endl;
+                return false;
+            }
+            parent = nextValue;
+        }
+
+        JSONObject *parentObj = dynamic_cast<JSONObject *>(parent);
+        if (!parentObj)
+        {
+            std::cerr << "Invalid path: " << path << std::endl;
+            return false;
+        }
+
+        if (!parentObj->getValue(lastToken))
+        {
+            std::cerr << "Element not found at path: " << path << std::endl;
+            return false;
+        }
+
+        parentObj->removeValue(lastToken);
+        return true;
+    }
+
+    // TODO: FIX
+    bool move(const std::string &fromPath, const std::string &toPath)
+    {
+        if (!root)
+        {
+            std::cerr << "No JSON structure parsed." << std::endl;
+            return false;
+        }
+
+        std::vector<std::string> fromTokens = splitPath(fromPath);
+        JSONValue *parentFrom = root;
+        std::string lastFromToken = fromTokens.back();
+        fromTokens.pop_back();
+
+        for (const std::string &token : fromTokens)
+        {
+            JSONObject *obj = dynamic_cast<JSONObject *>(parentFrom);
+            if (!obj)
+            {
+                std::cerr << "Invalid 'from' path: " << fromPath << std::endl;
+                return false;
+            }
+            parentFrom = obj->getValue(token);
+            if (!parentFrom)
+            {
+                std::cerr << "Path not found: " << fromPath << std::endl;
+                return false;
+            }
+        }
+
+        JSONObject *parentFromObj = dynamic_cast<JSONObject *>(parentFrom);
+        if (!parentFromObj)
+        {
+            std::cerr << "Invalid 'from' path: " << fromPath << std::endl;
+            return false;
+        }
+
+        JSONValue *valueToMove = parentFromObj->getValue(lastFromToken);
+        if (!valueToMove)
+        {
+            std::cerr << "Element not found at 'from' path: " << fromPath << std::endl;
+            return false;
+        }
+
+        std::vector<std::string> toTokens = splitPath(toPath);
+        JSONValue *parentTo = root;
+        std::string lastToToken = toTokens.back();
+        toTokens.pop_back();
+
+        for (const std::string &token : toTokens)
+        {
+            JSONObject *obj = dynamic_cast<JSONObject *>(parentTo);
+            if (!obj)
+            {
+                JSONObject *newObj = new JSONObject();
+                dynamic_cast<JSONObject *>(parentTo)->addValue(token, newObj);
+                parentTo = newObj;
+            }
+            else
+            {
+                parentTo = obj->getValue(token);
+                if (!parentTo)
+                {
+                    JSONObject *newObj = new JSONObject();
+                    obj->addValue(token, newObj);
+                    parentTo = newObj;
+                }
+            }
+        }
+
+        JSONObject *parentToObj = dynamic_cast<JSONObject *>(parentTo);
+        if (!parentToObj)
+        {
+            std::cerr << "Invalid 'to' path: " << toPath << std::endl;
+            return false;
+        }
+
+        if (parentToObj->getValue(lastToToken))
+        {
+            std::cerr << "Element already exists at 'to' path: " << toPath << std::endl;
+            return false;
+        }
+
+        parentToObj->addValue(lastToToken, valueToMove);
+        parentFromObj->removeValue(lastFromToken);
+
+        std::cerr << "Successfully moved value from " << fromPath << " to " << toPath << std::endl;
+
+        return true;
+    }
+
+    bool save(const std::string &currPath, const std::string &filePath = "", const std::string &path = "")
+    {
+        if (!root)
+        {
+            std::cerr << "No JSON structure parsed." << std::endl;
+            return false;
+        }
+
+        std::string targetFile = filePath.empty() ? currPath : filePath;
+
+        if (targetFile.empty())
+        {
+            std::cerr << "No file path specified." << std::endl;
+            return false;
+        }
+
+        JSONValue *target = root;
+        if (!path.empty())
+        {
+            std::vector<std::string> tokens = splitPath(path);
+            target = navigateToPath(root, tokens);
+            if (!target)
+            {
+                std::cerr << "Path not found: " << path << std::endl;
+                return false;
+            }
+        }
+
+        std::ofstream outFile(targetFile);
+        if (!outFile.is_open())
+        {
+            std::cerr << "Could not open file to write: " << targetFile << std::endl;
+            return false;
+        }
+
+        writeJSON(outFile, target, 0);
+        outFile.close();
+
+        return true;
+    }
+
+    bool saveas(const std::string &currPath, const std::string &newFilePath, const std::string &path = "")
+    {
+        return save(currPath, newFilePath, path);
     }
 
 private:
@@ -151,7 +396,7 @@ private:
         case JSONValueType::NUMBER:
         {
             JSONNumber *jsonNumber = static_cast<JSONNumber *>(jsonValue);
-            return std::stod(jsonNumber->toString()) == std::stod(value);
+            return jsonNumber->toString() == value;
         }
         case JSONValueType::BOOL:
         {

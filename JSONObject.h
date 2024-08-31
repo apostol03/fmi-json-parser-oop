@@ -72,6 +72,19 @@ public:
         return nullptr;
     }
 
+    void removeValue(const std::string &key)
+    {
+        for (auto it = values.begin(); it != values.end(); ++it)
+        {
+            if (it->key == key)
+            {
+                delete it->value;
+                values.erase(it);
+                return;
+            }
+        }
+    }
+
 private:
     std::vector<KeyValue> values;
 };

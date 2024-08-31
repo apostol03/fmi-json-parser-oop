@@ -1,3 +1,6 @@
+#ifndef VALIDATOR_H
+#define VALIDATOR_H
+
 #include "Lexer.h"
 
 class Validator
@@ -137,3 +140,5 @@ private:
     Lexer lexer;
     Token currentToken;
 };
+
+#endif
