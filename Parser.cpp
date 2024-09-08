@@ -33,7 +33,7 @@ void Parser::writeToFile(const std::string &filePath)
     {
         throw std::runtime_error("Could not open file to write.");
     }
-
+    print();
     writeJSON(outFile, root, 0);
     outFile.close();
 }
@@ -310,13 +310,7 @@ bool Parser::move(const std::string &fromPath, const std::string &toPath)
         return false;
     }
 
-    if (parentToObj->getValue(lastToToken))
-    {
-        std::cerr << "Element already exists at 'to' path: " << toPath << std::endl;
-        return false;
-    }
-
-    parentToObj->addValue(lastToToken, valueToMove);
+    parentToObj->setValue(lastToToken, valueToMove);
     parentFromObj->removeValue(lastFromToken);
 
     std::cerr << "Successfully moved value from " << fromPath << " to " << toPath << std::endl;

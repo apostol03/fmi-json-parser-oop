@@ -2,6 +2,7 @@
 #define JSON_OBJECT_H
 
 #include "JSONValue.h"
+#include <iostream>
 
 /**
  * Structure representing a key-value pair where the key

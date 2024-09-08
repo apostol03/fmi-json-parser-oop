@@ -38,6 +38,7 @@ void JSONObject::setValue(const std::string &key, JSONValue *newValue)
         {
             delete keyValue.value;
             keyValue.value = newValue;
+            std::cout << values[3].value->toString();
             return;
         }
     }
